@@ -1,4 +1,4 @@
-// js/quizEngine.js
+
 
 function arraysEqualAsSet(a, b) {
   if (!Array.isArray(a) || !Array.isArray(b)) return false;
