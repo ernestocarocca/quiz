@@ -1,7 +1,8 @@
 // js/ui.js
 import { QUESTIONS_BY_CATEGORY } from './questions.js'
 import { QuizEngine } from './quizEngine.js'
-import { renderQuestionHtml, renderResultsHtml } from "./templates.js";
+import { renderQuestionHtml, renderResultsHtml } from "./templates.js"
+
 let engine = null
 let timerId = null
 let timeLeft = 5
@@ -20,10 +21,10 @@ if (document.readyState === 'loading') {
 } else {
   initApp()
 }
+
 /**
  * Initialize DOM references and event listeners.
  */
-
 function initApp () {
   categoryStep = document.getElementById('categoryStep')
   quizStep = document.getElementById('quizStep')
@@ -77,13 +78,14 @@ function clearTimer () {
     timerId = null
   }
 }
+
 /**
  * Start a 5-second countdown for the current question.
  * Automatically moves forward on timeout.
  */
 function startTimer () {
   clearTimer()
-  timeLeft = 5
+  timeLeft = 10
   updateTimerText()
 
   timerId = setInterval(() => {
@@ -108,54 +110,44 @@ function startTimer () {
  * Supports boolean, single-choice and multiple-choice questions.
  */
 function renderCurrentQuestion () {
-  const q = engine.getCurrentQuestion();
-  const index = engine.currentIndex;
-  const storedAnswer = engine.userAnswers[index];
+  const q = engine.getCurrentQuestion()
+  const index = engine.currentIndex
+  const storedAnswer = engine.userAnswers[index]
 
-  progressText.textContent = `Fråga ${index + 1} av ${engine.questions.length}`;
+  progressText.textContent = `Fråga ${index + 1} av ${engine.questions.length}`
 
   questionContainer.innerHTML = renderQuestionHtml({
     q,
     index,
     total: engine.questions.length,
     storedAnswer,
-  });
+  })
 }
-
-
-
 
 function saveCurrentAnswerFromDOM () {
   const q = engine.getCurrentQuestion()
-
-  if (q.type === 'boolean') {
-    const checked = document.querySelector('input[name="answer"]:checked')
-    if (!checked) {
-      engine.saveAnswer(null)
-      return
+  
+  const answerHandlers = {
+    boolean: () => {
+      const checked = document.querySelector('input[name="answer"]:checked')
+      return checked ? checked.value === 'true' : null
+    },
+    single: () => {
+      const checked = document.querySelector('input[name="answer"]:checked')
+      return checked ? Number(checked.value) : null
+    },
+    multiple: () => {
+      const checkedBoxes = Array.from(
+        document.querySelectorAll('input[name="answer"]:checked')
+      )
+      return checkedBoxes.length > 0 
+        ? checkedBoxes.map(cb => Number(cb.value)) 
+        : null
     }
-    engine.saveAnswer(checked.value === 'true')
   }
 
-  if (q.type === 'single') {
-    const checked = document.querySelector('input[name="answer"]:checked')
-    if (!checked) {
-      engine.saveAnswer(null)
-      return
-    }
-    engine.saveAnswer(Number(checked.value))
-  }
-
-  if (q.type === 'multiple') {
-    const checkedBoxes = Array.from(
-      document.querySelectorAll('input[name="answer"]:checked')
-    )
-    if (checkedBoxes.length === 0) {
-      engine.saveAnswer(null)
-      return
-    }
-    engine.saveAnswer(checkedBoxes.map(cb => Number(cb.value)))
-  }
+  const answer = answerHandlers[q.type]?.() ?? null
+  engine.saveAnswer(answer)
 }
 
 function handleStart () {
@@ -207,23 +199,22 @@ function handleNext (fromTimeout = false) {
 }
 
 function showResults () {
-  clearTimer();
-  quizStep.classList.add('d-none');
-  resultBox.classList.remove('d-none');
+  clearTimer()
+  quizStep.classList.add('d-none')
+  resultBox.classList.remove('d-none')
 
-  const results = engine.calculateResults();
+  const results = engine.calculateResults()
 
-  resultBox.innerHTML = renderResultsHtml(results);
+  resultBox.innerHTML = renderResultsHtml(results)
 
   document
     .getElementById('retryBtn')
-    .addEventListener('click', restartQuizSameCategory);
+    .addEventListener('click', restartQuizSameCategory)
 
   document
     .getElementById('exitBtn')
-    .addEventListener('click', backToCategoryMenu);
+    .addEventListener('click', backToCategoryMenu)
 }
-
 
 function restartQuizSameCategory () {
   engine.currentIndex = 0
@@ -236,6 +227,7 @@ function restartQuizSameCategory () {
   errorBox.classList.add('d-none')
   startTimer()
 }
+
 /**
  * Exit quiz and return to category selection.
  */

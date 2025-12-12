@@ -55,19 +55,21 @@ export class QuizEngine {
     return false;
   }
 
-  formatCorrectAnswer(question) {
+
+
+  _isAnswerCorrect(question, answer) {
+    if (answer == null) return false;
     if (question.type === "boolean") {
-      return question.correct ? "Sant" : "Falskt";
+      return answer === question.correctAnswer; 
     }
     if (question.type === "single") {
-      return question.options[question.correctIndex];
+      return answer === question.correctAnswer; 
     }
     if (question.type === "multiple") {
-      return question.correctIndices.map((i) => question.options[i]).join(", ");
+      return arraysEqualAsSet(answer, question.correctAnswer);  
     }
-    return "";
+    return false;
   }
-
   formatUserAnswer(question, answer) {
     if (answer == null) return "(Ej svarat i tid)";
     if (question.type === "boolean") {
