@@ -96,6 +96,12 @@ export const QUESTIONS_BY_CATEGORY = {
       correctAnswer: [0, 1, 2]
     },
     {
+      id: 'js-4',
+      type: 'boolean',
+      text: 'JavaScript är samma sak som Java.',
+      correctAnswer: false
+    },
+    {
       id: 'js-5',
       type: 'single',
       text:
