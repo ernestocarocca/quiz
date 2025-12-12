@@ -85,7 +85,7 @@ function clearTimer () {
  */
 function startTimer () {
   clearTimer()
-  timeLeft = 5
+  timeLeft = 10
   updateTimerText()
 
   timerId = setInterval(() => {
