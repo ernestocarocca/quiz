@@ -4,10 +4,8 @@ import { QuizEngine } from './quizEngine.js'
 import { renderQuestionHtml, renderResultsHtml } from "./templates.js"
 
 let engine = null
-let timerId = null
-let timeLeft = 5
 
-let categoryStep, quizStep, resultBox, categoryError, progressText, timerText
+let categoryStep, quizStep, resultBox, categoryError, progressText
 let questionContainer, errorBox, startBtn, nextBtn, themeToggle, progressBar
 
 
@@ -32,7 +30,6 @@ function initApp () {
   resultBox = document.getElementById('resultBox')
   categoryError = document.getElementById('categoryError')
   progressText = document.getElementById('progressText')
-  timerText = document.getElementById('timerText')
   progressBar = document.getElementById('progressBar')
   questionContainer = document.getElementById('questionContainer')
   errorBox = document.getElementById('errorBox')
@@ -66,53 +63,11 @@ function setupEventListeners () {
 
   startBtn.addEventListener('click', handleStart)
   nextBtn.addEventListener('click', () => {
-    clearTimer()
     handleNext(false)
   })
 }
 
-function updateTimerText () {
-  const timeSpan = timerText.querySelector('span');
-  if (timeSpan) {
-    timeSpan.textContent = timeLeft;
-  } else {
-    timerText.innerHTML = `<i class="bi bi-clock-fill me-1"></i><span>${timeLeft}</span>s`;
-  }
-  
-  // Add warning styling when time is low
-  if (timeLeft <= 3) {
-    timerText.classList.add('warning');
-  } else {
-    timerText.classList.remove('warning');
-  }
-}
 
-function clearTimer () {
-  if (timerId) {
-    clearInterval(timerId)
-    timerId = null
-  }
-}
-
-/**
- * Start a 5-second countdown for the current question.
- * Automatically moves forward on timeout.
- */
-function startTimer () {
-  clearTimer()
-  timeLeft = 10
-  updateTimerText()
-
-  timerId = setInterval(() => {
-    timeLeft--
-    updateTimerText()
-
-    if (timeLeft <= 0) {
-      clearTimer()
-      handleNext(true)
-    }
-  }, 1000)
-}
 
 /**
  * -------------------------
@@ -202,14 +157,12 @@ function handleStart () {
 }
 
 function handleNext (fromTimeout = false) {
-  if (!fromTimeout) {
-    saveCurrentAnswerFromDOM()
+  saveCurrentAnswerFromDOM()
 
-    const ans = engine.userAnswers[engine.currentIndex]
-    if (ans == null && timeLeft > 0) {
-      errorBox.classList.remove('d-none')
-      return
-    }
+  const ans = engine.userAnswers[engine.currentIndex]
+  if (ans == null) {
+    errorBox.classList.remove('d-none')
+    return
   }
 
   errorBox.classList.add('d-none')
@@ -217,14 +170,12 @@ function handleNext (fromTimeout = false) {
   if (engine.hasNext()) {
     engine.next()
     renderCurrentQuestion()
-    startTimer()
   } else {
     showResults()
   }
 }
 
 function showResults () {
-  clearTimer()
   quizStep.classList.add('d-none')
   resultBox.classList.remove('d-none')
 
@@ -251,7 +202,6 @@ function restartQuizSameCategory () {
 
   renderCurrentQuestion()
   errorBox.classList.add('d-none')
-  startTimer()
 }
 
 /**
@@ -259,7 +209,6 @@ function restartQuizSameCategory () {
  */
 function backToCategoryMenu () {
   engine = null
-  clearTimer()
 
   quizStep.classList.add('d-none')
   resultBox.classList.add('d-none')

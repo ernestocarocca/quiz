@@ -1,6 +1,4 @@
-/**
- * Helper: Render a single input field (radio or checkbox)
- */
+
 function renderInputField({ type, name, id, value, checked, label }) {
   return `
     <label class="form-check" for="${id}">
@@ -66,9 +64,7 @@ function renderMultipleOptions(options, storedAnswer) {
     .join('');
 }
 
-/**
- * Build HTML for the current question card.
- */
+
 export function renderQuestionHtml({ q, index, total, storedAnswer }) {
   const questionTypes = {
     boolean: () => renderBooleanOptions(storedAnswer),
