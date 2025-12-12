@@ -8,7 +8,8 @@ let timerId = null
 let timeLeft = 5
 
 let categoryStep, quizStep, resultBox, categoryError, progressText, timerText
-let questionContainer, errorBox, startBtn, nextBtn, themeToggle
+let questionContainer, errorBox, startBtn, nextBtn, themeToggle, progressBar
+
 
 /**
  * -------------------------
@@ -32,6 +33,7 @@ function initApp () {
   categoryError = document.getElementById('categoryError')
   progressText = document.getElementById('progressText')
   timerText = document.getElementById('timerText')
+  progressBar = document.getElementById('progressBar')
   questionContainer = document.getElementById('questionContainer')
   errorBox = document.getElementById('errorBox')
   startBtn = document.getElementById('startBtn')
@@ -45,19 +47,20 @@ function setupEventListeners () {
   themeToggle.addEventListener('click', () => {
     const body = document.body
     const isLight = body.classList.contains('bg-light')
+    const icon = themeToggle.querySelector('i');
 
     if (isLight) {
       body.classList.remove('bg-light')
       body.classList.add('bg-dark', 'text-white')
-      themeToggle.textContent = 'Light mode'
-      themeToggle.classList.remove('btn-outline-dark')
-      themeToggle.classList.add('btn-outline-light')
+      if (icon) {
+        icon.className = 'bi bi-sun-fill';
+      }
     } else {
       body.classList.remove('bg-dark', 'text-white')
       body.classList.add('bg-light')
-      themeToggle.textContent = 'Dark mode'
-      themeToggle.classList.remove('btn-outline-light')
-      themeToggle.classList.add('btn-outline-dark')
+      if (icon) {
+        icon.className = 'bi bi-moon-stars-fill';
+      }
     }
   })
 
@@ -69,7 +72,19 @@ function setupEventListeners () {
 }
 
 function updateTimerText () {
-  timerText.textContent = `Tid kvar: ${timeLeft} s`
+  const timeSpan = timerText.querySelector('span');
+  if (timeSpan) {
+    timeSpan.textContent = timeLeft;
+  } else {
+    timerText.innerHTML = `<i class="bi bi-clock-fill me-1"></i><span>${timeLeft}</span>s`;
+  }
+  
+  // Add warning styling when time is low
+  if (timeLeft <= 3) {
+    timerText.classList.add('warning');
+  } else {
+    timerText.classList.remove('warning');
+  }
 }
 
 function clearTimer () {
@@ -114,7 +129,9 @@ function renderCurrentQuestion () {
   const index = engine.currentIndex
   const storedAnswer = engine.userAnswers[index]
 
+
   progressText.textContent = `Fråga ${index + 1} av ${engine.questions.length}`
+
 
   questionContainer.innerHTML = renderQuestionHtml({
     q,
@@ -122,6 +139,14 @@ function renderCurrentQuestion () {
     total: engine.questions.length,
     storedAnswer,
   })
+
+
+  const percent = Math.round(((index + 1) / engine.questions.length) * 100)
+  progressBar.style.width = `${percent}%`
+  progressBar.setAttribute('aria-valuenow', String(percent))
+
+
+  nextBtn.textContent = engine.hasNext() ? 'Nästa →' : 'Slutför ✓'
 }
 
 function saveCurrentAnswerFromDOM () {
@@ -204,8 +229,8 @@ function showResults () {
   resultBox.classList.remove('d-none')
 
   const results = engine.calculateResults()
-
   resultBox.innerHTML = renderResultsHtml(results)
+
 
   document
     .getElementById('retryBtn')
@@ -215,6 +240,7 @@ function showResults () {
     .getElementById('exitBtn')
     .addEventListener('click', backToCategoryMenu)
 }
+
 
 function restartQuizSameCategory () {
   engine.currentIndex = 0
